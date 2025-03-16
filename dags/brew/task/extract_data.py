@@ -1,9 +1,9 @@
-from airflow.exceptions import AirflowException  # Importa a exceção do Airflow
-import pandas as pd # type: ignore
+from airflow.exceptions import AirflowException # type: ignore
 import requests # type: ignore
+import logging
 import os
+import json
 
-from brew.config.settings import api_url
 
 def extract_data_api() -> None:
     """
@@ -24,18 +24,20 @@ def extract_data_api() -> None:
     extract_data_api()
     """
     try:
-        response = requests.get(api_url)
+        response = requests.get("https://api.openbrewerydb.org/breweries")
 
         if not response.status_code == 200:
             raise AirflowException(f'Erro ao conectar com a API. Status code: {response.status_code}')
         
-        brew_data = pd.DataFrame(response.json())
+        brew_data = response.json()
 
-        local_path = "tmp/dados.parquet"
+        logging.info(brew_data)
+
+        local_path = "dags/brew/temp/"
         
-        os.makedirs(local_path.split('/')[0], exist_ok=True)
+        os.makedirs(local_path, exist_ok=True)
         
-        brew_data.to_parquet(local_path, engine="pyarrow", index=False)
+        with open(os.path.join(local_path, 'brew_dados.json'), 'w')as file: json.dump(brew_data, file)
 
     except Exception as e:
         raise AirflowException(f'Ocorreu um erro ao processar os dados: {str(e)}')

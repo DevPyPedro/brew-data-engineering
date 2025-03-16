@@ -2,8 +2,12 @@
 DAG para cervejas
 ========================================================'
 '''
+from airflow.operators.python import PythonOperator#type: ignore
 from airflow import DAG #type: ignore
 import pendulum #type: ignore 
+
+from brew.task.extract_data import extract_data_api
+from brew.task.load_data import upload_file_s3
 
 default_args = {
     "retries":1,
@@ -19,4 +23,18 @@ with DAG(
     start_date=pendulum.datetime(2024, 12, 11, tz="America/Sao_Paulo"),
     max_active_runs=1,
     catchup=False
-) as dag: pass
+) as dag:
+     
+
+
+    extract_info_api = PythonOperator(
+        task_id='extract_info_api',
+        python_callable=extract_data_api, 
+    )
+
+    upload_file_bronze = PythonOperator(
+        task_id='upload_file_bronze',
+        python_callable=upload_file_s3, 
+    )
+
+    extract_info_api >> upload_file_bronze
