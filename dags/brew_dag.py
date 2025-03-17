@@ -6,6 +6,7 @@ from airflow.operators.python import PythonOperator#type: ignore
 from airflow import DAG #type: ignore
 import pendulum #type: ignore 
 
+from brew.task.transform_data import transform_data_silver, transform_data_gold
 from brew.task.extract_data import extract_data_api
 from brew.task.load_data import upload_file_s3
 
@@ -26,7 +27,6 @@ with DAG(
 ) as dag:
      
 
-
     extract_info_api = PythonOperator(
         task_id='extract_info_api',
         python_callable=extract_data_api, 
@@ -37,4 +37,14 @@ with DAG(
         python_callable=upload_file_s3, 
     )
 
-    extract_info_api >> upload_file_bronze
+    transform_for_silver = PythonOperator(
+        task_id='transform_for_silver',
+        python_callable=transform_data_silver, 
+    )
+
+    transform_for_gold = PythonOperator(
+        task_id='transform_for_gold',
+        python_callable=transform_data_gold, 
+    )
+
+    extract_info_api >> upload_file_bronze >> transform_for_silver >> transform_for_gold

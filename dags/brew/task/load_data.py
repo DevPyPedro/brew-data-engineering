@@ -1,5 +1,6 @@
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook #type: ignore
 from airflow.exceptions import AirflowException  # type: ignore # Importa a exceção do Airflow
+import logging
 
 def upload_file_s3() -> None:
     """
@@ -24,9 +25,9 @@ def upload_file_s3() -> None:
         local_path = 'dags/brew/temp/brew_dados.json'
         
         # Fazendo o upload do arquivo para o S3
-        s3_client.load_file(local_path, s3_key, bucket_name)
+        s3_client.load_file(local_path, s3_key, bucket_name, replace=True)
 
-        print(f"Arquivo {local_path} enviado com sucesso para o S3 no caminho {s3_key}.")
+        logging.info(f"Arquivo {local_path} enviado com sucesso")
 
     except Exception as e:
         raise AirflowException(f'Ocorreu um erro ao tentar enviar o arquivo para o S3: {str(e)}')

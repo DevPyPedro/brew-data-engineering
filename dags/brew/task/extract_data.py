@@ -31,13 +31,14 @@ def extract_data_api() -> None:
         
         brew_data = response.json()
 
-        logging.info(brew_data)
 
         local_path = "dags/brew/temp/"
         
         os.makedirs(local_path, exist_ok=True)
         
         with open(os.path.join(local_path, 'brew_dados.json'), 'w')as file: json.dump(brew_data, file)
+
+        logging.info('Extração feita com sucesso')
 
     except Exception as e:
         raise AirflowException(f'Ocorreu um erro ao processar os dados: {str(e)}')
