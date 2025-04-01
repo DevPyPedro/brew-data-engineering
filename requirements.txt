@@ -1,0 +1,5 @@
+dbt-athena-community
+astronomer-cosmos
+dbt-core
+dbt-postgres
+zeep
